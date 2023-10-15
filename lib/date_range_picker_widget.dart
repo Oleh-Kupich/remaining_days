@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 Future<DateTimeRange?> showDateRangePickerDialog({
   required BuildContext context,
-}) async =>
+}) =>
     showDateRangePicker(
         context: context,
         locale: Localizations.localeOf(context),

@@ -47,6 +47,7 @@ class _HomePageState extends State<HomePage> {
   final stays = List<StayItem>.empty(growable: true);
 
   void addStay(final StayItem stayItem) {
+    if (stays.contains(stayItem)) return;
     setState(() {
       stays.add(stayItem);
       stays.sort((range1, range2) => range2.start.compareTo(range1.end));
@@ -59,25 +60,66 @@ class _HomePageState extends State<HomePage> {
     });
   }
 
+  void showDateRangePicker() async {
+    DateTimeRange? picked = await showDateRangePickerDialog(context: context);
+    if (picked != null) {
+      addStay(StayItem.ofDateTimeRange(picked));
+    }
+  }
+
+  int calculateRemainingDays(List<DateTimeRange> entryExitDates) {
+
+    int totalDaysInSchengen = 0;
+    DateTime back180days = DateTime.now().subtract(const Duration(days: 180));
+
+    for (DateTimeRange dateRange in entryExitDates) {
+      // Check if the exit date is in the past.
+      if (dateRange.end.isBefore(back180days)) {
+        break;
+      }
+
+      // Check if the entry date is in the last 180 days.
+      if (dateRange.start.isAfter(back180days)) {
+        int daysInThisStay = dateRange.end
+            .difference(dateRange.start)
+            .inDays + 1; // Calculate the number of days in this stay.
+        totalDaysInSchengen += daysInThisStay;
+      }
+    }
+
+    int remainingDays = 90 - totalDaysInSchengen;
+
+    return remainingDays;
+  }
+
+  bool staysNotExit(List<DateTimeRange> stays) {
+    int totalDays = 0;
+    DateTime back180days = stays.last.end.subtract(const Duration(days: 180));
+    for (DateTimeRange dateRange in stays) {
+      if (dateRange.end.isBefore(back180days)) {
+        break;
+      }
+
+      int daysInThisStay = dateRange.end
+          .difference(dateRange.start)
+          .inDays + 1; // Calculate the number of days in this stay.
+      totalDays += daysInThisStay;
+    }
+    return totalDays <= 90;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
         backgroundColor: Theme.of(context).canvasColor,
         floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
         floatingActionButton: GestureDetector(
-          onVerticalDragUpdate: DefaultBottomBarController.of(context).onDrag,
-          onVerticalDragEnd: DefaultBottomBarController.of(context).onDragEnd,
-          child: StaysFABWidget(
-              hasStays: stays.isNotEmpty,
-              onPressed: () => DefaultBottomBarController.of(context).swap(),
-              onAddStay: () async {
-                DateTimeRange? picked =
-                    await showDateRangePickerDialog(context: context);
-                if (picked != null) {
-                  addStay(StayItem.ofDateTimeRange(picked));
-                }
-              }),
-        ),
+            onVerticalDragUpdate: DefaultBottomBarController.of(context).onDrag,
+            onVerticalDragEnd: DefaultBottomBarController.of(context).onDragEnd,
+            child: StaysFABWidget(
+                hasStays: stays.isNotEmpty,
+                onPressed: () => DefaultBottomBarController.of(context).swap(),
+                onAddStay: () => showDateRangePicker())),
         //
         // Actual expandable bottom bar
         bottomNavigationBar: BottomExpandableAppBar(
@@ -106,14 +148,7 @@ class _HomePageState extends State<HomePage> {
                 itemCount: stays.isEmpty ? 1 : stays.length,
                 itemBuilder: (context, index) => stays.isEmpty
                     ? EmptyStayListItemWidget(
-                        addStay: () async {
-                          DateTimeRange? picked =
-                              await showDateRangePickerDialog(context: context);
-                          if (picked != null) {
-                            addStay(StayItem.ofDateTimeRange(picked));
-                          }
-                        },
-                      )
+                        addStay: () => showDateRangePicker())
                     : StayListItemWidget(
                         stayListItem: stays[index],
                         onRemove: (item) => removeStay(item),
@@ -125,8 +160,9 @@ class _HomePageState extends State<HomePage> {
             )),
         body: Center(child: LayoutBuilder(
           builder: (BuildContext context, BoxConstraints constraints) {
+            int remainingDays = calculateRemainingDays(stays);
             return Text(
-              '90 days',
+              '$remainingDays ${remainingDays == 1 ? 'day' : 'days'}',
               style: TextStyle(fontSize: max(constraints.maxHeight / 8, 28)),
             );
           },
