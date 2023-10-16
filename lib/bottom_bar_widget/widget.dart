@@ -113,14 +113,12 @@ class _BottomExpandableAppBarState extends State<BottomExpandableAppBar> {
   }
 
   void _updateBarController() {
-    final BottomBarController newController =
-        widget.controller ?? DefaultBottomBarController.of(context);
+    final BottomBarController newController = widget.controller ?? DefaultBottomBarController.of(context);
 
     if (newController == _controller) return;
 
     if (_controller != null) {
-      _controller!.state
-          .removeListener(_handleBottomBarControllerAnimationTick);
+      _controller!.state.removeListener(_handleBottomBarControllerAnimationTick);
     }
 
     _controller = newController;
@@ -146,34 +144,26 @@ class _BottomExpandableAppBarState extends State<BottomExpandableAppBar> {
               ),
             );
 
-        final finalHeight = widget.expandedHeight ??
-            constraints.maxHeight - viewPadding.vertical;
+        final finalHeight = widget.expandedHeight ?? constraints.maxHeight - viewPadding.vertical;
 
         _controller!.dragLength = finalHeight;
 
         return Stack(
-          alignment: widget.attachSide == Side.Bottom
-              ? Alignment.bottomCenter
-              : Alignment.topCenter,
+          alignment: widget.attachSide == Side.Bottom ? Alignment.bottomCenter : Alignment.topCenter,
           children: <Widget>[
             Padding(
-              padding:
-                  EdgeInsets.symmetric(horizontal: widget.horizontalMargin),
+              padding: EdgeInsets.symmetric(horizontal: widget.horizontalMargin),
               child: Stack(
                 children: [
                   Container(
-                    height: panelState * finalHeight +
-                        widget.appBarHeight +
-                        widget.bottomOffset +
-                        viewPadding.vertical,
-                    decoration: widget.expandedDecoration ??
-                        BoxDecoration(
-                          color: widget.expandedBackColor ??
-                              Theme.of(context).backgroundColor,
-                          borderRadius: BorderRadius.circular(25),
-                        ),
-                    child: widget.expandedBody
-                  ),
+                      height:
+                          panelState * finalHeight + widget.appBarHeight + widget.bottomOffset + viewPadding.vertical,
+                      decoration: widget.expandedDecoration ??
+                          BoxDecoration(
+                            color: widget.expandedBackColor ?? Theme.of(context).backgroundColor,
+                            borderRadius: BorderRadius.circular(25),
+                          ),
+                      child: widget.expandedBody),
                 ],
               ),
             ),
@@ -207,14 +197,11 @@ class _BottomAppBarClipper extends CustomClipper<Path> {
       0.0,
       (geometry.value.bottomNavigationBarTop ?? 0) * -1.0 - buttonOffset,
     );
-    return shape.getOuterPath(
-        Offset(0, 0) & size, button?.inflate(notchMargin));
+    return shape.getOuterPath(Offset(0, 0) & size, button?.inflate(notchMargin));
   }
 
   @override
   bool shouldReclip(_BottomAppBarClipper oldClipper) {
-    return oldClipper.geometry != geometry ||
-        oldClipper.shape != shape ||
-        oldClipper.notchMargin != notchMargin;
+    return oldClipper.geometry != geometry || oldClipper.shape != shape || oldClipper.notchMargin != notchMargin;
   }
 }

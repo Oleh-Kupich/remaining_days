@@ -11,6 +11,7 @@ class StayListItemWidget extends StatelessWidget {
       required this.stayListItem,
       required this.onRemove,
       required this.onEdit,
+      required this.onAdd,
       this.leadingWidget})
       : super(key: key);
 
@@ -18,6 +19,7 @@ class StayListItemWidget extends StatelessWidget {
   final Widget? leadingWidget;
   final RemoveActionCallback onRemove;
   final EditActionCallback onEdit;
+  final VoidCallback onAdd;
 
   @override
   Widget build(BuildContext context) {
@@ -61,9 +63,8 @@ class StayListItemWidget extends StatelessWidget {
         child: ListTile(
           leading: leadingWidget,
           title: Text(stayListItem.toString()),
-          onLongPress: () {
-            onEdit(stayListItem);
-          },
+          onLongPress: () => onEdit(stayListItem),
+          onTap: onAdd,
         ));
   }
 }

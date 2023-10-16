@@ -1,48 +1,30 @@
 import 'package:flutter/material.dart';
 
-import 'bottom_bar_widget/controller.dart';
-
 class StaysFABWidget extends StatelessWidget {
   const StaysFABWidget(
-      {Key? key,
-      required this.hasStays,
-      required this.onAddStay,
-      required this.onPressed})
+      {Key? key, required this.hasStays, required this.onPressed, required this.onSort, required this.ascending})
       : super(key: key);
 
   final bool hasStays;
-  final VoidCallback onAddStay;
+  final bool ascending;
   final VoidCallback onPressed;
+  final VoidCallback onSort;
 
   @override
   Widget build(BuildContext context) {
     return FloatingActionButton.extended(
-        icon: hasStays
-            ? IconButton(
-                onPressed: onAddStay,
-                icon: const Icon(Icons.add_circle_outline),
-              )
-            : const SizedBox(width: 27),
         label: Row(
           children: [
+            const SizedBox(width: 28),
             const Text('Stays', style: TextStyle(fontSize: 18)),
-            AnimatedBuilder(
-              animation: DefaultBottomBarController.of(context).state,
-              builder: (context, child) => Transform(
-                alignment: Alignment.center,
-                transform: Matrix4.diagonal3Values(
-                  1,
-                  DefaultBottomBarController.of(context).state.value * 2 - 1,
-                  1,
-                ),
-                child: child,
-              ),
-              child: const RotatedBox(
-                quarterTurns: 1,
-                child: Icon(Icons.chevron_right),
-              ),
-            ),
-            const SizedBox(width: 27)
+            hasStays
+                ? IconButton(
+                    onPressed: onSort,
+                    icon: Icon(
+                      ascending ? Icons.arrow_drop_down : Icons.arrow_drop_up,
+                      size: 32,
+                    ))
+                : const SizedBox(width: 20),
           ],
         ),
         elevation: 2,

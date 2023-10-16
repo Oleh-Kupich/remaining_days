@@ -1,6 +1,8 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+import 'package:remaining_days/remaining_days_math.dart';
 import 'package:remaining_days/stay_item.dart';
 import 'package:remaining_days/list_item_widgets/stay_item.dart';
 import 'package:remaining_days/stays_fab_widget.dart';
@@ -45,12 +47,22 @@ class _HomePageState extends State<HomePage> {
   bool scrollWasAtTop = true;
 
   final stays = List<StayItem>.empty(growable: true);
+  var ascending = true;
 
   void addStay(final StayItem stayItem) {
     if (stays.contains(stayItem)) return;
     setState(() {
       stays.add(stayItem);
-      stays.sort((range1, range2) => range2.start.compareTo(range1.end));
+      stays.sort(
+          (range1, range2) => ascending ? range2.start.compareTo(range1.start) : range1.start.compareTo(range2.start));
+    });
+  }
+
+  void sort() {
+    ascending = !ascending;
+    setState(() {
+      stays.sort(
+          (range1, range2) => ascending ? range2.start.compareTo(range1.start) : range1.start.compareTo(range2.start));
     });
   }
 
@@ -60,52 +72,39 @@ class _HomePageState extends State<HomePage> {
     });
   }
 
-  void showDateRangePicker() async {
-    DateTimeRange? picked = await showDateRangePickerDialog(context: context);
+  void showDateRangePicker({StayItem? editingItem}) async {
+    DateTimeRange? picked = await showDateRangePickerDialog(context: context, initialDateRange: editingItem);
+
     if (picked != null) {
+      if (editingItem != null) removeStay(editingItem);
       addStay(StayItem.ofDateTimeRange(picked));
     }
   }
 
-  int calculateRemainingDays(List<DateTimeRange> entryExitDates) {
-
-    int totalDaysInSchengen = 0;
-    DateTime back180days = DateTime.now().subtract(const Duration(days: 180));
-
-    for (DateTimeRange dateRange in entryExitDates) {
-      // Check if the exit date is in the past.
-      if (dateRange.end.isBefore(back180days)) {
-        break;
-      }
-
-      // Check if the entry date is in the last 180 days.
-      if (dateRange.start.isAfter(back180days)) {
-        int daysInThisStay = dateRange.end
-            .difference(dateRange.start)
-            .inDays + 1; // Calculate the number of days in this stay.
-        totalDaysInSchengen += daysInThisStay;
-      }
+  (int, String) calculateRemainingDays(final List<StayItem> entryExitDates,
+      {int maxStay = 90, int rollingRange = 180}) {
+    (int, DateTimeRange?) usedDays;
+    if ((usedDays = daysStayIn(entryExitDates, rollingRange: rollingRange, skipFuture: true)).$1 > maxStay) {
+      final overStayRange = StayItem(
+          start: DateTime(usedDays.$2!.end.year, usedDays.$2!.end.month, usedDays.$2!.end.day - (rollingRange - 1)),
+          end: usedDays.$2!.end);
+      return (maxStay - usedDays.$1, 'Overstay in the period \n$overStayRange');
     }
 
-    int remainingDays = 90 - totalDaysInSchengen;
-
-    return remainingDays;
-  }
-
-  bool staysNotExit(List<DateTimeRange> stays) {
-    int totalDays = 0;
-    DateTime back180days = stays.last.end.subtract(const Duration(days: 180));
-    for (DateTimeRange dateRange in stays) {
-      if (dateRange.end.isBefore(back180days)) {
-        break;
-      }
-
-      int daysInThisStay = dateRange.end
-          .difference(dateRange.start)
-          .inDays + 1; // Calculate the number of days in this stay.
-      totalDays += daysInThisStay;
+    int remainingDays = 0;
+    DateTime today = DateTime.now();
+    while (remainingDays < maxStay &&
+        daysStayIn(entryExitDates + [StayItem(start: today, end: today.add(Duration(days: remainingDays)))],
+                    rollingRange: rollingRange)
+                .$1 <=
+            maxStay) {
+      ++remainingDays;
     }
-    return totalDays <= 90;
+
+    return (
+      remainingDays,
+      'from Today to ${DateFormat('d MMM y').format(today.add(Duration(days: remainingDays)))}',
+    );
   }
 
   @override
@@ -117,55 +116,61 @@ class _HomePageState extends State<HomePage> {
             onVerticalDragUpdate: DefaultBottomBarController.of(context).onDrag,
             onVerticalDragEnd: DefaultBottomBarController.of(context).onDragEnd,
             child: StaysFABWidget(
-                hasStays: stays.isNotEmpty,
-                onPressed: () => DefaultBottomBarController.of(context).swap(),
-                onAddStay: () => showDateRangePicker())),
+              hasStays: stays.isNotEmpty,
+              ascending: ascending,
+              onPressed: () => DefaultBottomBarController.of(context).swap(),
+              onSort: () => sort(),
+            )),
         //
         // Actual expandable bottom bar
         bottomNavigationBar: BottomExpandableAppBar(
             appBarHeight: 200,
             expandedHeight: 300,
             horizontalMargin: 0,
-            shape: const AutomaticNotchedShape(
-                RoundedRectangleBorder(), StadiumBorder(side: BorderSide())),
+            shape: const AutomaticNotchedShape(RoundedRectangleBorder(), StadiumBorder(side: BorderSide())),
             expandedBody: NotificationListener<ScrollEndNotification>(
               onNotification: (scrollNotification) {
-                final bottomBarController =
-                    DefaultBottomBarController.of(context);
+                final bottomBarController = DefaultBottomBarController.of(context);
                 final metrics = scrollNotification.metrics;
                 final scrollIsAtTop = metrics.atEdge && metrics.pixels == 0;
-                if (scrollWasAtTop &&
-                    bottomBarController.isOpen &&
-                    scrollIsAtTop) {
+                if (scrollWasAtTop && bottomBarController.isOpen && scrollIsAtTop) {
                   bottomBarController.close();
                 }
                 scrollWasAtTop = scrollIsAtTop;
                 return true;
               },
               child: ListView.separated(
-                padding:
-                    const EdgeInsets.symmetric(vertical: 32, horizontal: 16),
+                padding: const EdgeInsets.symmetric(vertical: 32, horizontal: 16),
                 itemCount: stays.isEmpty ? 1 : stays.length,
                 itemBuilder: (context, index) => stays.isEmpty
-                    ? EmptyStayListItemWidget(
-                        addStay: () => showDateRangePicker())
+                    ? EmptyStayListItemWidget(addStay: () => showDateRangePicker())
                     : StayListItemWidget(
                         stayListItem: stays[index],
                         onRemove: (item) => removeStay(item),
-                        onEdit: (_) {},
+                        onEdit: (item) => showDateRangePicker(editingItem: item),
+                        onAdd: () => showDateRangePicker(),
                         leadingWidget: Text('${stays.length - index}'),
                       ),
                 separatorBuilder: (context, index) => const Divider(),
               ),
             )),
-        body: Center(child: LayoutBuilder(
+        body: LayoutBuilder(
           builder: (BuildContext context, BoxConstraints constraints) {
-            int remainingDays = calculateRemainingDays(stays);
-            return Text(
-              '$remainingDays ${remainingDays == 1 ? 'day' : 'days'}',
-              style: TextStyle(fontSize: max(constraints.maxHeight / 8, 28)),
-            );
+            final (int, String) remainingDays = calculateRemainingDays(stays);
+            return Center(
+                child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
+              Text(
+                '${remainingDays.$1} ${remainingDays.$1 == 1 ? 'day' : 'days'}',
+                style: TextStyle(
+                    color: remainingDays.$1 < 0 ? Colors.red : null, fontSize: max(constraints.maxHeight / 8, 28)),
+              ),
+              Text(
+                remainingDays.$2,
+                textAlign: TextAlign.center,
+                style: const TextStyle(fontSize: 18),
+              ),
+            ]));
           },
-        )));
+        ));
   }
 }

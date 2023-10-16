@@ -26,8 +26,7 @@ class BottomBarController extends ChangeNotifier {
     _animationController.addStatusListener((_) => notifyListeners());
   }
 
-  @Deprecated(
-      "This is deprecated in favor of `state`, and will be removed in the future")
+  @Deprecated("This is deprecated in favor of `state`, and will be removed in the future")
   Animation<double> get animation => _animationController.view;
 
   /// Returns the [view] of the internal [AnimationController],
@@ -54,8 +53,7 @@ class BottomBarController extends ChangeNotifier {
 
     // Check if the velocity is sufficient to constitute fling
     if (details.velocity.pixelsPerSecond.dy.abs() >= minFlingVelocity) {
-      double visualVelocity =
-          -details.velocity.pixelsPerSecond.dy / (dragLength!);
+      double visualVelocity = -details.velocity.pixelsPerSecond.dy / (dragLength!);
 
       if (snap) {
         _animationController.fling(velocity: visualVelocity);
@@ -133,8 +131,7 @@ class DefaultBottomBarController extends StatefulWidget {
   /// Returns the nearest [BottomBarController] of the
   /// given [BuildContext]
   static BottomBarController of(BuildContext context) {
-    final _BottomBarControllerScope? scope =
-        context.findAncestorWidgetOfExactType<_BottomBarControllerScope>();
+    final _BottomBarControllerScope? scope = context.findAncestorWidgetOfExactType<_BottomBarControllerScope>();
     if (scope != null) {
       return scope.controller;
     } else {
@@ -145,12 +142,10 @@ class DefaultBottomBarController extends StatefulWidget {
   }
 
   @override
-  _DefaultBottomBarControllerState createState() =>
-      _DefaultBottomBarControllerState();
+  _DefaultBottomBarControllerState createState() => _DefaultBottomBarControllerState();
 }
 
-class _DefaultBottomBarControllerState extends State<DefaultBottomBarController>
-    with SingleTickerProviderStateMixin {
+class _DefaultBottomBarControllerState extends State<DefaultBottomBarController> with SingleTickerProviderStateMixin {
   late BottomBarController _controller;
 
   @override
