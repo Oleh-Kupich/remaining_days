@@ -1,0 +1,15 @@
+{
+  "stays": "Stays",
+  "save": "Save",
+  "stay_period": "from Today to {}",
+  "day": {
+    "zero": "{} days",
+    "one": "{} day",
+    "two": "{} days",
+    "few": "{} days",
+    "many": "{} days",
+    "other": "{} days"
+  },
+  "overstay": "Overstay in the period \n{}",
+  "add_stay": "Add stays by taping here"
+}

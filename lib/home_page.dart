@@ -1,51 +1,27 @@
 import 'dart:math';
-import 'dart:io';
+
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import 'package:remaining_days/math/remaining_days.dart';
 import 'package:remaining_days/models/region_config.dart';
 import 'package:remaining_days/models/stay_item.dart';
 import 'package:remaining_days/storage/user_preferences.dart';
+import 'package:remaining_days/widgets/bottom_bar_widget/controller.dart';
+import 'package:remaining_days/widgets/bottom_bar_widget/widget.dart';
+import 'package:remaining_days/widgets/date_range_picker_widget.dart';
+import 'package:remaining_days/widgets/list_item_widgets/empty_stay.dart';
 import 'package:remaining_days/widgets/list_item_widgets/stay_item.dart';
 import 'package:remaining_days/widgets/stays_fab_widget.dart';
-import 'widgets/bottom_bar_widget/widget.dart';
-import 'widgets/date_range_picker_widget.dart';
-import 'widgets/list_item_widgets/empty_stay.dart';
-import 'widgets/bottom_bar_widget/controller.dart';
-
-void main() {
-  runApp(const RemainingDaysApp());
-}
-
-class RemainingDaysApp extends StatelessWidget {
-  const RemainingDaysApp({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    final colorScheme = ColorScheme.fromSeed(seedColor: Colors.orangeAccent);
-    return MaterialApp(
-      title: 'Flutter Demo',
-      theme: ThemeData(
-        colorScheme: colorScheme,
-        scaffoldBackgroundColor: colorScheme.surface,
-        useMaterial3: true,
-      ),
-      home: DefaultBottomBarController(
-        child: const HomePage(),
-      ),
-    );
-  }
-}
 
 class HomePage extends StatefulWidget {
-  const HomePage({Key? key}) : super(key: key);
+  const HomePage({super.key});
 
   @override
   State<HomePage> createState() => _HomePageState();
 }
 
 class _HomePageState extends State<HomePage> {
-  final storage = const UserPreferences();
+  final storage = UserPreferences();
   RegionConfig? region;
 
   bool scrollWasAtTop = true;
@@ -56,7 +32,7 @@ class _HomePageState extends State<HomePage> {
     storage.readSelected().then((value) => setState(() { region = value; }));
   }
 
-  void addStay(final StayItem stayItem) {
+  void addStay(StayItem stayItem) {
     final config = region;
     if (config == null) return;
     if (config.stays.contains(stayItem)) return;
@@ -64,12 +40,12 @@ class _HomePageState extends State<HomePage> {
     setState(() {
       config.stays.add(stayItem);
       config.stays.sort((range1, range2) =>
-          config.sortAscending ? range2.start.compareTo(range1.start) : range1.start.compareTo(range2.start));
+          config.sortAscending ? range2.start.compareTo(range1.start) : range1.start.compareTo(range2.start),);
     });
     storage.write(config);
   }
 
-  void removeStay(final StayItem stayItem) {
+  void removeStay(StayItem stayItem) {
     final config = region;
     if (config == null) return;
     setState(() {
@@ -87,12 +63,12 @@ class _HomePageState extends State<HomePage> {
 
     setState(() {
       config.stays.sort((range1, range2) =>
-          config.sortAscending ? range2.start.compareTo(range1.start) : range1.start.compareTo(range2.start));
+          config.sortAscending ? range2.start.compareTo(range1.start) : range1.start.compareTo(range2.start),);
     });
   }
 
-  void showDateRangePicker({StayItem? editingItem}) async {
-    DateTimeRange? picked = await showDateRangePickerDialog(context: context, initialDateRange: editingItem);
+  Future<void> showDateRangePicker({StayItem? editingItem}) async {
+    final picked = await showDateRangePickerDialog(context: context, initialDateRange: editingItem);
 
     if (picked != null) {
       if (editingItem != null) removeStay(editingItem);
@@ -100,21 +76,21 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
-  (int, String) calculateRemainingDays(final List<StayItem> entryExitDates,
-      {required int maxStay, required int rollingRange}) {
+  (int, String) calculateRemainingDays(List<StayItem> entryExitDates,
+      {required int maxStay, required int rollingRange,}) {
     (int, DateTimeRange?) usedDays;
     if ((usedDays = daysStayIn(entryExitDates, rollingRange: rollingRange, skipFutureDates: true)).$1 > maxStay) {
       final overStayRange = StayItem(
           start: DateTime(usedDays.$2!.end.year, usedDays.$2!.end.month, usedDays.$2!.end.day - (rollingRange - 1)),
-          end: usedDays.$2!.end);
-      return (maxStay - usedDays.$1, 'Overstay in the period \n$overStayRange');
+          end: usedDays.$2!.end,);
+      return (maxStay - usedDays.$1, 'overstay'.tr(args: [overStayRange.toString()]));
     }
 
-    int remainingDays = 0;
-    DateTime today = DateTime.now();
+    var remainingDays = 0;
+    final today = DateTime.now();
     while (remainingDays < maxStay &&
         daysStayIn(entryExitDates + [StayItem(start: today, end: today.add(Duration(days: remainingDays)))],
-                    rollingRange: rollingRange, skipFutureDates: false)
+                    rollingRange: rollingRange, skipFutureDates: false,)
                 .$1 <=
             maxStay) {
       ++remainingDays;
@@ -122,7 +98,7 @@ class _HomePageState extends State<HomePage> {
 
     return (
       remainingDays,
-      'from Today to ${DateFormat('d MMM y').format(today.add(Duration(days: remainingDays)))}',
+      'stay_period'.tr(args: [DateFormat('d MMM y').format(today.add(Duration(days: remainingDays)))]),
     );
   }
 
@@ -139,8 +115,8 @@ class _HomePageState extends State<HomePage> {
               hasStays: stays.isNotEmpty,
               ascending: region?.sortAscending ?? true,
               onPressed: () => DefaultBottomBarController.of(context).swap(),
-              onSort: () => sort(),
-            )),
+              onSort: sort,
+            ),),
         bottomNavigationBar: GestureDetector(
             onTap: showDateRangePicker,
             child: BottomExpandableAppBar(
@@ -163,44 +139,44 @@ class _HomePageState extends State<HomePage> {
                     padding: const EdgeInsets.symmetric(vertical: 32, horizontal: 16),
                     itemCount: stays.isEmpty ? 1 : stays.length,
                     itemBuilder: (context, index) => stays.isEmpty
-                        ? EmptyStayListItemWidget(addStay: () => showDateRangePicker())
+                        ? EmptyStayListItemWidget(addStay: showDateRangePicker)
                         : StayListItemWidget(
                             stayListItem: stays[index],
-                            onRemove: (item) => removeStay(item),
+                            onRemove: removeStay,
                             onEdit: (item) => showDateRangePicker(editingItem: item),
-                            onAdd: () => showDateRangePicker(),
+                            onAdd: showDateRangePicker,
                             leadingWidget: Text('${stays.length - index}'),
                           ),
                     separatorBuilder: (context, index) => const Divider(),
                   ),
-                ))),
+                ),),),
         body: LayoutBuilder(
           builder: (BuildContext context, BoxConstraints constraints) {
-            final (int, String) remainingDays =
+            final remainingDays =
                 calculateRemainingDays(
                     stays,
                     maxStay: region?.maxStay ?? 90,
-                    rollingRange: region?.rollingPeriod ?? 180
+                    rollingRange: region?.rollingPeriod ?? 180,
                 );
             return Center(
                 child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Text(
-                        '${remainingDays.$1} ${remainingDays.$1 == 1 ? 'day' : 'days'}',
+                        'day'.plural(remainingDays.$1),
                         style: TextStyle(
-                            color: remainingDays.$1 < 0 ? Colors.red : null, fontSize: max(constraints.maxHeight / 10, 28)),
+                            color: remainingDays.$1 < 0 ? Colors.red : null, fontSize: max(constraints.maxHeight / 10, 28),),
                       ),
                       Text(
                         remainingDays.$2,
                         textAlign: TextAlign.center,
                         style: TextStyle(fontSize: max(constraints.maxHeight / 24, 14)),
-                      )
-                    ]
-                )
+                      ),
+                    ],
+                ),
             );
           },
-        )
+        ),
     );
   }
 }

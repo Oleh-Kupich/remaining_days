@@ -1,5 +1,5 @@
-import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:remaining_days/models/stay_item.dart';
 
 typedef RemoveActionCallback = void Function(StayItem item);
@@ -7,13 +7,8 @@ typedef EditActionCallback = void Function(StayItem item);
 
 class StayListItemWidget extends StatelessWidget {
   const StayListItemWidget(
-      {Key? key,
-      required this.stayListItem,
-      required this.onRemove,
-      required this.onEdit,
-      required this.onAdd,
-      this.leadingWidget})
-      : super(key: key);
+      {required this.stayListItem, required this.onRemove, required this.onEdit, required this.onAdd, super.key,
+      this.leadingWidget,});
 
   final StayItem stayListItem;
   final Widget? leadingWidget;
@@ -31,7 +26,7 @@ class StayListItemWidget extends StatelessWidget {
           extentRatio: 0.3,
           dismissible: DismissiblePane(onDismissed: () {
             onRemove(stayListItem);
-          }),
+          },),
           children: [
             SlidableAction(
               onPressed: (_) {
@@ -65,6 +60,6 @@ class StayListItemWidget extends StatelessWidget {
           title: Text(stayListItem.toString()),
           onLongPress: () => onEdit(stayListItem),
           onTap: onAdd,
-        ));
+        ),);
   }
 }

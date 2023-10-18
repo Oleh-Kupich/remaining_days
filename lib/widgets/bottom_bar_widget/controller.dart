@@ -2,6 +2,16 @@ import 'package:flutter/material.dart';
 
 /// A listenable controller for use with [BottomExpandableBar]
 class BottomBarController extends ChangeNotifier {
+
+  /// Creates a [BottomBarController] with the given [vsync] ticker provider
+  BottomBarController({
+    required TickerProvider vsync,
+    this.snap = true,
+    double? dragLength,
+  })  : _animationController = AnimationController(vsync: vsync),
+        _dragLength = dragLength {
+    _animationController.addStatusListener((_) => notifyListeners());
+  }
   /// Set to true if sheet should snap to Opened and Closed state
   final bool snap;
 
@@ -16,17 +26,7 @@ class BottomBarController extends ChangeNotifier {
     _dragLength = value;
   }
 
-  /// Creates a [BottomBarController] with the given [vsync] ticker provider
-  BottomBarController({
-    required TickerProvider vsync,
-    this.snap = true,
-    double? dragLength,
-  })  : _animationController = AnimationController(vsync: vsync),
-        _dragLength = dragLength {
-    _animationController.addStatusListener((_) => notifyListeners());
-  }
-
-  @Deprecated("This is deprecated in favor of `state`, and will be removed in the future")
+  @Deprecated('This is deprecated in favor of `state`, and will be removed in the future')
   Animation<double> get animation => _animationController.view;
 
   /// Returns the [view] of the internal [AnimationController],
@@ -46,14 +46,14 @@ class BottomBarController extends ChangeNotifier {
   /// details of a [GestureDragEndCallback]
   void onDragEnd(DragEndDetails details) {
     if (dragLength == null) return;
-    double minFlingVelocity = 365.0;
+    const minFlingVelocity = 365;
 
     // Let the current animation finish before starting a new one
     if (_animationController.isAnimating) return;
 
     // Check if the velocity is sufficient to constitute fling
     if (details.velocity.pixelsPerSecond.dy.abs() >= minFlingVelocity) {
-      double visualVelocity = -details.velocity.pixelsPerSecond.dy / (dragLength!);
+      final visualVelocity = -details.velocity.pixelsPerSecond.dy / (dragLength!);
 
       if (snap) {
         _animationController.fling(velocity: visualVelocity);
@@ -61,7 +61,7 @@ class BottomBarController extends ChangeNotifier {
         // actual scroll physics will be implemented in a future release
         _animationController.animateTo(
           _animationController.value + visualVelocity * 0.16,
-          duration: Duration(milliseconds: 410),
+          duration: const Duration(milliseconds: 410),
           curve: Curves.decelerate,
         );
       }
@@ -70,10 +70,11 @@ class BottomBarController extends ChangeNotifier {
 
     // Check if the controller is already halfway there
     if (snap) {
-      if (_animationController.value > 0.5)
+      if (_animationController.value > 0.5) {
         open();
-      else
+      } else {
         close();
+      }
     }
   }
 
@@ -119,19 +120,18 @@ class BottomBarController extends ChangeNotifier {
 /// A widget that provides a default bottom bar controller
 /// to its children
 class DefaultBottomBarController extends StatefulWidget {
-  /// The child of the [DefaultBottomBarController] widget
-  final Widget child;
 
   /// Creates a default [BottomBarController] for the given [child] widget
-  DefaultBottomBarController({
-    Key? key,
-    required this.child,
-  }) : super(key: key);
+  const DefaultBottomBarController({
+    required this.child, super.key,
+  });
+  /// The child of the [DefaultBottomBarController] widget
+  final Widget child;
 
   /// Returns the nearest [BottomBarController] of the
   /// given [BuildContext]
   static BottomBarController of(BuildContext context) {
-    final _BottomBarControllerScope? scope = context.findAncestorWidgetOfExactType<_BottomBarControllerScope>();
+    final scope = context.findAncestorWidgetOfExactType<_BottomBarControllerScope>();
     if (scope != null) {
       return scope.controller;
     } else {
@@ -142,7 +142,7 @@ class DefaultBottomBarController extends StatefulWidget {
   }
 
   @override
-  _DefaultBottomBarControllerState createState() => _DefaultBottomBarControllerState();
+  State<DefaultBottomBarController> createState() => _DefaultBottomBarControllerState();
 }
 
 class _DefaultBottomBarControllerState extends State<DefaultBottomBarController> with SingleTickerProviderStateMixin {
@@ -172,11 +172,8 @@ class _DefaultBottomBarControllerState extends State<DefaultBottomBarController>
 
 class _BottomBarControllerScope extends InheritedWidget {
   const _BottomBarControllerScope({
-    Key? key,
-    this.enabled = true,
-    required this.controller,
-    required Widget child,
-  }) : super(key: key, child: child);
+    required this.controller, required super.child, this.enabled = true,
+  });
 
   final BottomBarController controller;
   final bool enabled;

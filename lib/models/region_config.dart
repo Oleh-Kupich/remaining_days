@@ -3,12 +3,6 @@ import 'dart:convert';
 import 'package:remaining_days/models/stay_item.dart';
 
 class RegionConfig {
-  String name;
-  int maxStay;
-  int rollingPeriod;
-  bool sortAscending;
-  bool selected;
-  List<StayItem> stays;
 
   RegionConfig(
       {required this.name,
@@ -16,19 +10,25 @@ class RegionConfig {
       required this.rollingPeriod,
       required this.sortAscending,
       required this.selected,
-      required this.stays});
+      required this.stays,});
 
-  static RegionConfig defaultConfig() =>
-      RegionConfig(name: "Default", maxStay: 90, rollingPeriod: 180, sortAscending: true, selected: true, stays: []);
+  RegionConfig.defaultConfig() : name = 'Default', maxStay = 90, rollingPeriod = 180, sortAscending = true, selected = true, stays = [];
+
+  String name;
+  int maxStay;
+  int rollingPeriod;
+  bool sortAscending;
+  bool selected;
+  List<StayItem> stays;
 
   factory RegionConfig.fromJson(Map<String, dynamic> jsonData) => RegionConfig(
-        name: jsonData['name'],
-        maxStay: jsonData['maxStay'],
-        rollingPeriod: jsonData['rollingPeriod'],
-        sortAscending: jsonData['sortAscending'],
-        selected: jsonData['selected'],
-        stays: List<StayItem>.from((jsonData['stays'] as List).map((stay) => StayItem.fromJson(stay))),
-      );
+    name: jsonData['name'] as String,
+    maxStay: jsonData['maxStay'] as int,
+    rollingPeriod: jsonData['rollingPeriod'] as int,
+    sortAscending: jsonData['sortAscending'] as bool,
+    selected: jsonData['selected'] as bool,
+    stays: List<StayItem>.from((jsonData['stays'] as List).map((stay) => StayItem.fromJson(stay as Map<String, dynamic>))),
+  );
 
   Map<String, dynamic> toJson() => {
         'name': name,
@@ -41,5 +41,5 @@ class RegionConfig {
 
   static String serialize(RegionConfig model) => jsonEncode(model.toJson());
 
-  static RegionConfig deserialize(String json) => RegionConfig.fromJson(jsonDecode(json));
+  static RegionConfig deserialize(String json) => RegionConfig.fromJson(jsonDecode(json) as Map<String, dynamic>);
 }

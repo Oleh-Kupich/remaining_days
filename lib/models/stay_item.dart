@@ -12,8 +12,8 @@ class StayItem extends DateTimeRange {
   String toString() => '${DateFormat('d MMM y').format(start)} - ${DateFormat('d MMM y').format(end)}';
 
   factory StayItem.fromJson(Map<String, dynamic> jsonData) => StayItem(
-    start: DateTime.parse(jsonData['start']),
-    end: DateTime.parse(jsonData['end']),
+    start: DateTime.parse(jsonData['start'] as String),
+    end: DateTime.parse(jsonData['end'] as String),
   );
 
   Map<String, dynamic> toJson() => {

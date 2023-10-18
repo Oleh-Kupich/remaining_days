@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 
 Future<DateTimeRange?> showDateRangePickerDialog({
@@ -9,8 +10,7 @@ Future<DateTimeRange?> showDateRangePickerDialog({
         initialDateRange: initialDateRange,
         locale: Localizations.localeOf(context),
         keyboardType: TextInputType.text,
-        initialEntryMode: DatePickerEntryMode.calendar,
-        confirmText: "Save",
+        confirmText: 'save'.tr(),
         firstDate: DateTime(DateTime.now().year - 2),
         lastDate: DateTime(DateTime.now().year + 2),
         builder: (context, child) {
@@ -21,5 +21,5 @@ Future<DateTimeRange?> showDateRangePickerDialog({
               ),
               child: Container(
                   margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 32),
-                  child: ClipRRect(borderRadius: BorderRadius.circular(20.0), child: child)));
-        });
+                  child: ClipRRect(borderRadius: BorderRadius.circular(20), child: child),),);
+        },);

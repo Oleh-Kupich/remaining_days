@@ -1,10 +1,10 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 
 class EmptyStayListItemWidget extends StatelessWidget {
   const EmptyStayListItemWidget({
-    Key? key,
-    required this.addStay,
-  }) : super(key: key);
+    required this.addStay, super.key,
+  });
 
   final VoidCallback addStay;
 
@@ -12,16 +12,16 @@ class EmptyStayListItemWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return InkWell(
       onTap: addStay,
-      child: const SizedBox(
+      child: SizedBox(
           height: 100,
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(Icons.add_circle_outline),
-              SizedBox(width: 8),
-              Text('Add stay by taping here'),
+              const Icon(Icons.add_circle_outline),
+              const SizedBox(width: 8),
+              const Text('add_stay').tr(),
             ],
-          )),
+          ),),
     );
   }
 }
