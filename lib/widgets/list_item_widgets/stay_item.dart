@@ -1,6 +1,6 @@
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:flutter/material.dart';
-import 'package:remaining_days/stay_item.dart';
+import 'package:remaining_days/models/stay_item.dart';
 
 typedef RemoveActionCallback = void Function(StayItem item);
 typedef EditActionCallback = void Function(StayItem item);
@@ -28,7 +28,7 @@ class StayListItemWidget extends StatelessWidget {
         // The start action pane is the one at the left or the top side.
         startActionPane: ActionPane(
           motion: const StretchMotion(),
-          extentRatio: 0.4,
+          extentRatio: 0.3,
           dismissible: DismissiblePane(onDismissed: () {
             onRemove(stayListItem);
           }),
@@ -47,7 +47,7 @@ class StayListItemWidget extends StatelessWidget {
         ),
         // The end action pane is the one at the right or the bottom side.
         endActionPane: ActionPane(
-          extentRatio: 0.4,
+          extentRatio: 0.3,
           motion: const StretchMotion(),
           children: [
             SlidableAction(

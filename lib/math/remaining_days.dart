@@ -1,14 +1,14 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
-import 'package:remaining_days/stay_item.dart';
-import 'package:remaining_days/list_item_widgets/stay_item.dart';
-import 'package:remaining_days/stays_fab_widget.dart';
+import 'package:remaining_days/models/stay_item.dart';
+import 'package:remaining_days/widgets/list_item_widgets/stay_item.dart';
+import 'package:remaining_days/widgets/stays_fab_widget.dart';
 
-import 'bottom_bar_widget/widget.dart';
-import 'date_range_picker_widget.dart';
-import 'list_item_widgets/empty_stay.dart';
-import 'bottom_bar_widget/controller.dart';
+import '../widgets/bottom_bar_widget/widget.dart';
+import '../widgets/date_range_picker_widget.dart';
+import '../widgets/list_item_widgets/empty_stay.dart';
+import '../widgets/bottom_bar_widget/controller.dart';
 
 List<DateTimeRange> mergeFirst2RangesIfIntersect(List<DateTimeRange> ranges) {
   if (ranges.length < 2) return ranges;
@@ -40,11 +40,12 @@ List<DateTimeRange> mergeRangesIfIntersect(List<DateTimeRange> ranges, {bool ski
   return mergedStays;
 }
 
-(int, DateTimeRange?) daysStayIn(List<DateTimeRange> stays, {int rollingRange = 180, bool skipFuture = false}) {
+(int, DateTimeRange?) daysStayIn(List<DateTimeRange> stays, {required int rollingRange, required bool skipFutureDates}) {
   int totalDays = 0;
   if (stays.isEmpty) return (totalDays, null);
 
-  var mergedStays = mergeRangesIfIntersect(stays, skipFuture: skipFuture);
+  var mergedStays = mergeRangesIfIntersect(stays, skipFuture: skipFutureDates);
+  if (mergedStays.isEmpty) return (totalDays, null);
 
   DateTime back180days =
       DateTime(mergedStays.last.end.year, mergedStays.last.end.month, mergedStays.last.end.day - (rollingRange - 1));
@@ -56,6 +57,5 @@ List<DateTimeRange> mergeRangesIfIntersect(List<DateTimeRange> ranges, {bool ski
     totalDays += daysInThisStay;
   }
 
-  print('$mergedStays --- $totalDays');
   return (totalDays, DateTimeRange(start: mergedStays.first.start, end: mergedStays.last.end));
 }

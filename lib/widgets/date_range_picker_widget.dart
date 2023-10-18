@@ -11,8 +11,8 @@ Future<DateTimeRange?> showDateRangePickerDialog({
         keyboardType: TextInputType.text,
         initialEntryMode: DatePickerEntryMode.calendar,
         confirmText: "Save",
-        firstDate: DateTime(DateTime.now().year - 5),
-        lastDate: DateTime(DateTime.now().year + 5),
+        firstDate: DateTime(DateTime.now().year - 2),
+        lastDate: DateTime(DateTime.now().year + 2),
         builder: (context, child) {
           return Theme(
               data: Theme.of(context).copyWith(

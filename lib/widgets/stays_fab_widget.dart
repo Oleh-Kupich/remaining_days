@@ -24,7 +24,7 @@ class StaysFABWidget extends StatelessWidget {
                       ascending ? Icons.arrow_drop_down : Icons.arrow_drop_up,
                       size: 32,
                     ))
-                : const SizedBox(width: 20),
+                : const SizedBox(width: 28),
           ],
         ),
         elevation: 2,
