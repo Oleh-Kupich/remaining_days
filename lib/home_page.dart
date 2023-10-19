@@ -8,9 +8,10 @@ import 'package:remaining_days/models/stay_item.dart';
 import 'package:remaining_days/storage/user_preferences.dart';
 import 'package:remaining_days/widgets/bottom_bar_widget/controller.dart';
 import 'package:remaining_days/widgets/bottom_bar_widget/widget.dart';
-import 'package:remaining_days/widgets/date_range_picker_widget.dart';
+import 'package:remaining_days/widgets/date_range_picker_dialog.dart';
 import 'package:remaining_days/widgets/list_item_widgets/empty_stay.dart';
 import 'package:remaining_days/widgets/list_item_widgets/stay_item.dart';
+import 'package:remaining_days/widgets/settings_dialog.dart';
 import 'package:remaining_days/widgets/stays_fab_widget.dart';
 
 class HomePage extends StatefulWidget {
@@ -21,62 +22,67 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  final storage = UserPreferences();
-  RegionConfig? region;
+  final _storage = UserPreferences();
+  RegionConfig _region = RegionConfig.defaultConfig();
 
-  bool scrollWasAtTop = true;
+  bool _scrollWasAtTop = true;
 
   @override
   void initState() {
     super.initState();
-    storage.readSelected().then((value) => setState(() { region = value; }));
+    _storage.readSelected().then((value) => setState(() {
+      if (value != null) _region = value;
+    }),);
   }
 
-  void addStay(StayItem stayItem) {
-    final config = region;
-    if (config == null) return;
-    if (config.stays.contains(stayItem)) return;
+  void _addStay(StayItem stayItem) {
+    if (_region.stays.contains(stayItem)) return;
 
     setState(() {
-      config.stays.add(stayItem);
-      config.stays.sort((range1, range2) =>
-          config.sortAscending ? range2.start.compareTo(range1.start) : range1.start.compareTo(range2.start),);
+      _region.stays.add(stayItem);
+      _region.stays.sort((range1, range2) =>
+        _region.sortAscending ? range2.start.compareTo(range1.start) : range1.start.compareTo(range2.start),);
     });
-    storage.write(config);
+    _storage.write(_region);
   }
 
-  void removeStay(StayItem stayItem) {
-    final config = region;
-    if (config == null) return;
+  void _removeStay(StayItem stayItem) {
     setState(() {
-      config.stays.remove(stayItem);
+      _region.stays.remove(stayItem);
     });
-    storage.write(config);
+    _storage.write(_region);
   }
 
-  void sort() {
-    final config = region;
-    if (config == null) return;
-
-    config.sortAscending = !config.sortAscending;
-    storage.write(config);
+  void _sort() {
+    _region.sortAscending = !_region.sortAscending;
+    _storage.write(_region);
 
     setState(() {
-      config.stays.sort((range1, range2) =>
-          config.sortAscending ? range2.start.compareTo(range1.start) : range1.start.compareTo(range2.start),);
+      _region.stays.sort((range1, range2) =>
+        _region.sortAscending ? range2.start.compareTo(range1.start) : range1.start.compareTo(range2.start),);
     });
   }
 
-  Future<void> showDateRangePicker({StayItem? editingItem}) async {
+  void _updateRegionSettings(Map<String, dynamic> settings) {
+    setState(() {
+      _region
+          ..name = settings[Settings.regionName.name] as String
+          ..rollingPeriod = int.parse(settings[Settings.rollingPeriod.name] as String)
+          ..maxStay = int.parse(settings[Settings.maxStay.name] as String);
+    });
+    _storage.write(_region);
+  }
+
+  Future<void> _showDateRangePicker({StayItem? editingItem}) async {
     final picked = await showDateRangePickerDialog(context: context, initialDateRange: editingItem);
 
     if (picked != null) {
-      if (editingItem != null) removeStay(editingItem);
-      addStay(StayItem.ofDateTimeRange(picked));
+      if (editingItem != null) _removeStay(editingItem);
+      _addStay(StayItem.ofDateTimeRange(picked));
     }
   }
 
-  (int, String) calculateRemainingDays(List<StayItem> entryExitDates,
+  (int, String) _calculateRemainingDays(List<StayItem> entryExitDates,
       {required int maxStay, required int rollingRange,}) {
     (int, DateTimeRange?) usedDays;
     if ((usedDays = daysStayIn(entryExitDates, rollingRange: rollingRange, skipFutureDates: true)).$1 > maxStay) {
@@ -104,8 +110,22 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    final stays = region?.stays ?? [];
+    final stays = _region.stays;
     return Scaffold(
+        appBar: AppBar(
+          title: Text(_region.name),
+          centerTitle: true,
+          actions: [
+            IconButton(
+                onPressed: () => displayTextInputDialog(
+                    context: context,
+                    config: _region,
+                    onSave: _updateRegionSettings,
+                ),
+                icon: const Icon(Icons.settings),
+            ),
+          ],
+        ),
         backgroundColor: Theme.of(context).canvasColor,
         floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
         floatingActionButton: GestureDetector(
@@ -113,15 +133,15 @@ class _HomePageState extends State<HomePage> {
             onVerticalDragEnd: DefaultBottomBarController.of(context).onDragEnd,
             child: StaysFABWidget(
               hasStays: stays.isNotEmpty,
-              ascending: region?.sortAscending ?? true,
+              ascending: _region.sortAscending,
               onPressed: () => DefaultBottomBarController.of(context).swap(),
-              onSort: sort,
+              onSort: _sort,
             ),),
         bottomNavigationBar: GestureDetector(
-            onTap: showDateRangePicker,
+            onTap: _showDateRangePicker,
             child: BottomExpandableAppBar(
                 appBarHeight: 200,
-                expandedHeight: 300,
+                expandedHeight: 200,
                 horizontalMargin: 0,
                 shape: const AutomaticNotchedShape(RoundedRectangleBorder(), StadiumBorder(side: BorderSide())),
                 expandedBody: NotificationListener<ScrollEndNotification>(
@@ -129,22 +149,22 @@ class _HomePageState extends State<HomePage> {
                     final bottomBarController = DefaultBottomBarController.of(context);
                     final metrics = scrollNotification.metrics;
                     final scrollIsAtTop = metrics.atEdge && metrics.pixels == 0;
-                    if (scrollWasAtTop && bottomBarController.isOpen && scrollIsAtTop) {
+                    if (_scrollWasAtTop && bottomBarController.isOpen && scrollIsAtTop) {
                       bottomBarController.close();
                     }
-                    scrollWasAtTop = scrollIsAtTop;
+                    _scrollWasAtTop = scrollIsAtTop;
                     return true;
                   },
                   child: ListView.separated(
                     padding: const EdgeInsets.symmetric(vertical: 32, horizontal: 16),
                     itemCount: stays.isEmpty ? 1 : stays.length,
                     itemBuilder: (context, index) => stays.isEmpty
-                        ? EmptyStayListItemWidget(addStay: showDateRangePicker)
+                        ? EmptyStayListItemWidget(addStay: _showDateRangePicker)
                         : StayListItemWidget(
                             stayListItem: stays[index],
-                            onRemove: removeStay,
-                            onEdit: (item) => showDateRangePicker(editingItem: item),
-                            onAdd: showDateRangePicker,
+                            onRemove: _removeStay,
+                            onEdit: (item) => _showDateRangePicker(editingItem: item),
+                            onAdd: _showDateRangePicker,
                             leadingWidget: Text('${stays.length - index}'),
                           ),
                     separatorBuilder: (context, index) => const Divider(),
@@ -153,10 +173,10 @@ class _HomePageState extends State<HomePage> {
         body: LayoutBuilder(
           builder: (BuildContext context, BoxConstraints constraints) {
             final remainingDays =
-                calculateRemainingDays(
+                _calculateRemainingDays(
                     stays,
-                    maxStay: region?.maxStay ?? 90,
-                    rollingRange: region?.rollingPeriod ?? 180,
+                    maxStay: _region.maxStay,
+                    rollingRange: _region.rollingPeriod,
                 );
             return Center(
                 child: Column(

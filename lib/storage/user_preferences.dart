@@ -12,8 +12,8 @@ class UserPreferences {
       aOptions: getAndroidOptions(),
     ).then((value) => value.entries.map((entry) => RegionConfig.deserialize(entry.value)).toList(growable: true));
 
-  Future<RegionConfig> readSelected() async => readAll()
-      .then((value) => value.where((element) => element.selected).firstOrNull ?? RegionConfig.defaultConfig());
+  Future<RegionConfig?> readSelected() async => readAll()
+      .then((value) => value.where((element) => element.selected).firstOrNull);
 
   Future<void> write(RegionConfig config) async => _storage.write(
         key: config.name,
