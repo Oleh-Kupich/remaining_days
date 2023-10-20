@@ -1,5 +1,5 @@
 {
-  "stays": "Stays",
+  "stays": "Visits",
   "save": "Save",
   "stay_period": "from Today to {}",
   "day": {
@@ -10,6 +10,18 @@
     "many": "{} days",
     "other": "{} days"
   },
+  "day_suffix": {
+    "zero": "days",
+    "one": "day",
+    "two": "days",
+    "few": "days",
+    "many": "days",
+    "other": "days"
+  },
   "overstay": "Overstay in the period \n{}",
-  "add_stay": "Add stays by taping here"
+  "add_stay": "Add visits by taping here",
+  "region" : "Region",
+  "name" : "Name",
+  "period" : "Period",
+  "maximum_stay" : "Maximum stay"
 }

@@ -1,5 +1,6 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:form_builder_validators/localization/l10n.dart';
 import 'package:remaining_days/home_page.dart';
 import 'package:remaining_days/widgets/bottom_bar_widget/controller.dart';
 
@@ -26,7 +27,7 @@ class RemainingDaysApp extends StatelessWidget {
     final colorScheme = ColorScheme.fromSeed(seedColor: Colors.orangeAccent);
     return MaterialApp(
       title: 'Remaining Days',
-      localizationsDelegates: context.localizationDelegates,
+      localizationsDelegates: context.localizationDelegates + [FormBuilderLocalizations.delegate],
       supportedLocales: context.supportedLocales,
       locale: context.locale,
       theme: ThemeData(

@@ -20,7 +20,7 @@ class StaysFABWidget extends StatelessWidget {
             if (hasStays) IconButton(
                     onPressed: onSort,
                     icon: Icon(
-                      ascending ? Icons.arrow_drop_down : Icons.arrow_drop_up,
+                      ascending ? Icons.arrow_drop_up : Icons.arrow_drop_down,
                       size: 32,
                     ),) else const SizedBox(width: 28),
           ],
