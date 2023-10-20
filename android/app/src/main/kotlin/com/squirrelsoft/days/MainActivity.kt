@@ -1,4 +1,4 @@
-package com.example.remaining_days
+package com.squirrelsoft.days
 
 import io.flutter.embedding.android.FlutterActivity
 

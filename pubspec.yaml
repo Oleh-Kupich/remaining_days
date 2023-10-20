@@ -28,6 +28,7 @@ environment:
 # the latest version available on pub.dev. To see which dependencies have newer
 # versions available, run `flutter pub outdated`.
 dependencies:
+  change_app_package_name: ^1.1.0
   cupertino_icons: ^1.0.6
   custom_date_range_picker: ^1.0.10
   easy_localization: ^3.0.3
