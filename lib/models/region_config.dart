@@ -12,7 +12,7 @@ class RegionConfig {
       required this.selected,
       required this.stays,});
 
-  RegionConfig.defaultConfig() : name = 'Default', maxStay = 90, rollingPeriod = 180, sortAscending = false, selected = true, stays = [];
+  RegionConfig.defaultConfig() : name = 'EU', maxStay = 90, rollingPeriod = 180, sortAscending = false, selected = true, stays = [];
 
   String name;
   int maxStay;
