@@ -112,7 +112,9 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     final stays = _region.stays;
     return Scaffold(
+        extendBodyBehindAppBar: true,
         appBar: AppBar(
+          scrolledUnderElevation: 0,
           title: Text(_region.name),
           centerTitle: true,
           actions: [
