@@ -26,7 +26,7 @@ class RemainingDaysApp extends StatelessWidget {
   Widget build(BuildContext context) {
     final colorScheme = ColorScheme.fromSeed(seedColor: Colors.orangeAccent);
     return MaterialApp(
-      title: 'Days',
+      title: 'VisaDays',
       localizationsDelegates: context.localizationDelegates + [FormBuilderLocalizations.delegate],
       supportedLocales: context.supportedLocales,
       locale: context.locale,

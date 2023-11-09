@@ -19,9 +19,11 @@
     "other": "days"
   },
   "overstay": "Overstay in the period \n{}",
-  "add_stay": "Add visits by taping here",
+  "add_stay": "＋ Add your past visits by taping here",
   "region" : "Region",
   "name" : "Name",
   "period" : "Period",
-  "maximum_stay" : "Maximum stay"
+  "maximum_stay" : "Maximum stay",
+  "delete" : "Delete",
+  "edit" : "Edit"
 }

@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:remaining_days/models/stay_item.dart';
@@ -35,7 +36,7 @@ class StayListItemWidget extends StatelessWidget {
               backgroundColor: Colors.redAccent,
               foregroundColor: Colors.white,
               icon: Icons.delete_forever_rounded,
-              label: 'Delete',
+              label: 'delete'.tr(),
             ),
           ],
         ),
@@ -50,7 +51,7 @@ class StayListItemWidget extends StatelessWidget {
               },
               backgroundColor: Colors.green,
               icon: Icons.edit,
-              label: 'Edit',
+              label: 'edit'.tr(),
             ),
           ],
         ),

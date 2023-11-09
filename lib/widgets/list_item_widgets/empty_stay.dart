@@ -13,15 +13,16 @@ class EmptyStayListItemWidget extends StatelessWidget {
     return InkWell(
       onTap: addStay,
       child: SizedBox(
-          height: 100,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Icon(Icons.add),
-              const SizedBox(width: 8),
-              const Text('add_stay').tr(),
-            ],
-          ),),
+        height: 100,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Flexible(
+                child:  const Text('add_stay', textAlign: TextAlign.center).tr(),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
