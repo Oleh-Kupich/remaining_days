@@ -114,9 +114,11 @@ class _HomePageState extends State<HomePage> {
       ++remainingDays;
     }
 
+    if (remainingDays == 0) return (0, '');
+
     return (
       remainingDays,
-      'stay_period'.tr(args: [DateFormat('d MMM y').format(today.add(Duration(days: remainingDays)))]),
+      'stay_period'.tr(args: [DateFormat('d MMM y').format(today.add(Duration(days: remainingDays - 1)))]),
     );
   }
 
@@ -150,44 +152,41 @@ class _HomePageState extends State<HomePage> {
           ascending: _region.sortAscending,
           onPressed: () => DefaultBottomBarController.of(context).swap(),
           onSort: _sort,
+          onAdd: _showDateRangePicker,
         ),
       ),
       bottomNavigationBar: LayoutBuilder(
         builder: (BuildContext context, BoxConstraints constraints) {
           final collapsedHeight = constraints.maxHeight / 4;
           final expandedHeight = constraints.maxHeight / 3;
-          return GestureDetector(
-            onTap: _showDateRangePicker,
-            child: BottomExpandableAppBar(
-              appBarHeight: collapsedHeight,
-              expandedHeight: expandedHeight,
-              horizontalMargin: 0,
-              shape: const AutomaticNotchedShape(RoundedRectangleBorder(), StadiumBorder(side: BorderSide())),
-              expandedBody: NotificationListener<ScrollEndNotification>(
-                onNotification: (scrollNotification) {
-                  final bottomBarController = DefaultBottomBarController.of(context);
-                  final metrics = scrollNotification.metrics;
-                  final scrollIsAtTop = metrics.atEdge && metrics.pixels == 0;
-                  if (_scrollWasAtTop && bottomBarController.isOpen && scrollIsAtTop) {
-                    bottomBarController.close();
-                  }
-                  _scrollWasAtTop = scrollIsAtTop;
-                  return true;
-                },
-                child: ListView.separated(
-                  padding: const EdgeInsets.symmetric(vertical: 32, horizontal: 16),
-                  itemCount: stays.isEmpty ? 1 : stays.length,
-                  itemBuilder: (context, index) => stays.isEmpty
-                      ? EmptyStayListItemWidget(addStay: _showDateRangePicker)
-                      : StayListItemWidget(
-                          stayListItem: stays[index],
-                          onRemove: _removeStay,
-                          onEdit: (item) => _showDateRangePicker(editingItem: item),
-                          onAdd: _showDateRangePicker,
-                          leadingWidget: Text('${stays.length - index}'),
-                        ),
-                  separatorBuilder: (context, index) => const Divider(),
+          return BottomExpandableAppBar(
+            appBarHeight: collapsedHeight,
+            expandedHeight: expandedHeight,
+            horizontalMargin: 0,
+            shape: const AutomaticNotchedShape(RoundedRectangleBorder(), StadiumBorder(side: BorderSide())),
+            expandedBody: NotificationListener<ScrollEndNotification>(
+              onNotification: (scrollNotification) {
+                final bottomBarController = DefaultBottomBarController.of(context);
+                final metrics = scrollNotification.metrics;
+                final scrollIsAtTop = metrics.atEdge && metrics.pixels == 0;
+                if (_scrollWasAtTop && bottomBarController.isOpen && scrollIsAtTop) {
+                  bottomBarController.close();
+                }
+                _scrollWasAtTop = scrollIsAtTop;
+                return true;
+              },
+              child: ListView.separated(
+                padding: const EdgeInsets.symmetric(vertical: 32, horizontal: 16),
+                itemCount: stays.isEmpty ? 1 : stays.length,
+                itemBuilder: (context, index) => stays.isEmpty
+                    ? EmptyStayListItemWidget(addStay: _showDateRangePicker)
+                    : StayListItemWidget(
+                  stayListItem: stays[index],
+                  onRemove: _removeStay,
+                  onEdit: (item) => _showDateRangePicker(editingItem: item),
+                  leadingWidget: Text('${stays.length - index}'),
                 ),
+                separatorBuilder: (context, index) => const Divider(),
               ),
             ),
           );

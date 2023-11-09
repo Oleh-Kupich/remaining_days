@@ -7,14 +7,13 @@ typedef EditActionCallback = void Function(StayItem item);
 
 class StayListItemWidget extends StatelessWidget {
   const StayListItemWidget(
-      {required this.stayListItem, required this.onRemove, required this.onEdit, required this.onAdd, super.key,
+      {required this.stayListItem, required this.onRemove, required this.onEdit, super.key,
       this.leadingWidget,});
 
   final StayItem stayListItem;
   final Widget? leadingWidget;
   final RemoveActionCallback onRemove;
   final EditActionCallback onEdit;
-  final VoidCallback onAdd;
 
   @override
   Widget build(BuildContext context) {
@@ -59,7 +58,7 @@ class StayListItemWidget extends StatelessWidget {
           leading: leadingWidget,
           title: Text(stayListItem.toString()),
           onLongPress: () => onEdit(stayListItem),
-          onTap: onAdd,
+          onTap: () => onEdit(stayListItem),
         ),);
   }
 }
